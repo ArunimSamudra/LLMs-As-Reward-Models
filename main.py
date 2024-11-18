@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     agent = DQNAgent(state_dim, action_dim)
     trainer = Trainer()
-    rewards = trainer.train_agent(env, agent)
+    rewards = trainer.train_agent(env, agent, 500)
 
     print("Training complete!")
 
