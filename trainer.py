@@ -100,7 +100,7 @@ class Trainer:
 
             while not done:
                 action = agent.select_action(state)
-                next_state, reward, done, _, _ = env.step(action)
+                next_state, reward, done, truncated, info = env.step(action)
                 next_state = np.array(next_state, dtype=np.float32)
                 agent.replay_buffer.add(state, action, reward, next_state, done)
                 state = next_state
