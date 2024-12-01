@@ -1,15 +1,19 @@
 import numpy as np
 import gymnasium as gym
+from gym.envs.toy_text.frozen_lake import generate_random_map
 
 from algos.DQN_frozen_lake import DQNAgent
 from trainer import Trainer
 
-def evaluate_agent(env, agent, episodes=100):
+def evaluate_agent(agent, env, episodes=100, randomize_env=False):
     total_rewards = 0
     win_count = 0
     loss_count = 0
 
     for episode in range(episodes):
+        if(randomize_env):
+            env = gym.make(env_name, render_mode='human', is_slippery=False, desc=generate_random_map(size=4))  # Add 'is_slippery' to simulate the stochastic environment
+
         state, _ = env.reset()
         state = np.array(state, dtype=np.float32)
         done = False
@@ -43,7 +47,7 @@ def evaluate_agent(env, agent, episodes=100):
 
 if __name__ == "__main__":
     env_name = "FrozenLake-v1"
-    env = gym.make(env_name, render_mode=None, is_slippery=True)  # Add 'is_slippery' to simulate the stochastic environment
+    env = gym.make(env_name, render_mode=None, is_slippery=False)  # Add 'is_slippery' to simulate the stochastic environment
 
     state_dim = env.observation_space.n  # FrozenLake state space is discrete (size = number of grid positions)
     action_dim = env.action_space.n  # FrozenLake action space (4: up, down, left, right)
@@ -51,9 +55,18 @@ if __name__ == "__main__":
     agent = DQNAgent(env_name, state_dim, action_dim)
     trainer = Trainer()
 
-    rewards = trainer.train_agent(env, agent, 1500)  # Train the agent
+    episodes = 2000
+    rewards = trainer.train_agent(env, agent, episodes)  # Train the agent
+
+    # Randomize Map
+    # for episode in range(episodes):    
+    #     env = gym.make(env_name, render_mode=None, is_slippery=False, desc=generate_random_map(size=4))  # Add 'is_slippery' to simulate the stochastic environment
+    #     rewards = trainer.train_agent(env, agent, episodes=1, verbose=False)  # Train the agent
+    #     print(f"Episode {episode + 1}, Reward: {rewards[-1]}, Epsilon: {agent.epsilon:.3f}")
 
     print("Training complete!")
 
     print("Evaluating the trained agent...")
-    evaluate_agent(env, agent)
+
+    env = gym.make(env_name, render_mode=None, is_slippery=False, desc=generate_random_map(size=4))  # Add 'is_slippery' to simulate the stochastic environment
+    evaluate_agent(agent, env, randomize_env=True)
