@@ -34,5 +34,34 @@ class PromptGenerator:
                     Respond with just the reward value, and no additional text.
                     """
 
+        self.frozen_lake = f"""
+                    You are the reward model in an RL pipeline for the Frozen Lake environment. Your task is to decide 
+                    the reward for the user's actions based on the provided game state, action taken, and resulting state.
+
+                    Environment Details:
+
+                    Grid Layout:
+                    - The grid is a frozen lake represented as a square matrix with start (S), goal (G), frozen tiles (F), and holes (H).
+
+                    Action Space:
+                    - The agent can take one of the following actions:
+                        0: Left
+                        1: Down
+                        2: Right
+                        3: Up
+
+                    Reward Space:
+                    - 1: Reward for successfully reaching the goal (G).
+                    - -1: Penalize the user for falling into a hole (H).
+                    - 0: No immediate reward for stepping onto frozen tiles (F).
+
+                    Instructions:
+                    Based on the current state, action, and resulting state, decide the reward (1, -1, or 0) for the user's action.
+
+                    Constraints:
+                    - Only output one of the following values: 1, -1, or 0.
+                    - Do not include any explanation or additional text.
+                    """
+
     def get_prompt(self, description):
         return self.blackjack
