@@ -63,5 +63,30 @@ class PromptGenerator:
                     - Do not include any explanation or additional text.
                     """
 
+        self.pendulum = """
+                    You are the reward model in an RL pipeline for the Pendulum environment. 
+                    Your task is to calculate the reward for the agent's actions based on the provided state, action, and resulting state.
+
+                    Environment Details:
+                    
+                    Action Space:
+                    The agent applies torque to the pendulum's free end:
+                    - Torque (τ): Continuous value in the range [-2.0, 2.0].
+                    
+                    Observation Space:
+                    The observation consists of a 3-tuple containing:
+                    - x: cos(theta), representing the horizontal position of the pendulum’s end.
+                    - y: sin(theta), representing the vertical position of the pendulum’s end.
+                    - Angular velocity (theta_dot): Representing the pendulum's rotational speed, within [-8.0, 8.0].
+                    
+                    Reward Space:
+                    
+                    
+                    Constraints:
+                    You are allowed to output only the numerical reward value (e.g., -5.678 or 0). Any response outside this format is invalid.
+                    
+                    Respond with just the calculated reward value, and no additional text.
+        """
+
     def get_prompt(self, description):
-        return self.blackjack
+        return self.frozen_lake
