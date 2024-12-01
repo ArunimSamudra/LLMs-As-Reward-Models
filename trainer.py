@@ -59,10 +59,11 @@ class Trainer:
                 next_state, algo_reward, done, _, _ = env.step(action)
 
                 # Describe the state transition in natural language
-                description = f"The agent chose action {action} and transitioned to state {next_state}. The dealer's cards are {env.env.env.dealer}"
+                blackjack_description = f"The agent chose action {action} and transitioned to state {next_state}. The dealer's cards are {env.env.env.dealer}"
+                fl_description = f"The frozen lake looks like this: {generate_random_map(size=4)}.\n\nThe agent chose action {action} and transitioned to state {next_state}."
 
                 # Get reward from LLM
-                reward = self.get_llm_reward(description)
+                reward = self.get_llm_reward(fl_description) # blackjack_description, fl_description
 
                 # Add experience to replay buffer
                 next_state = np.array(next_state, dtype=np.float32)
@@ -89,7 +90,7 @@ class Trainer:
         print("Time taken: {:.4f} seconds".format(execution_time))
         return rewards
 
-    def train_agent(self, env, agent, episodes=3000, batch_size=64, target_update_freq=10):
+    def train_agent(self, env, agent, episodes=3000, batch_size=64, target_update_freq=10, verbose=True):
         rewards = []
         start_time = time.time()
         for episode in range(episodes):
@@ -116,10 +117,12 @@ class Trainer:
             if episode % target_update_freq == 0:
                 agent.update_target_network()
 
-            print(f"Episode {episode + 1}, Reward: {episode_reward}, Epsilon: {agent.epsilon:.3f}")
+            if(verbose):
+                print(f"Episode {episode + 1}, Reward: {episode_reward}, Epsilon: {agent.epsilon:.3f}")
         end_time = time.time()
 
         # Calculate the time taken
         execution_time = end_time - start_time
-        print("Time taken: {:.4f} seconds".format(execution_time))
+        if(verbose):
+            print("Time taken: {:.4f} seconds".format(execution_time))
         return rewards
