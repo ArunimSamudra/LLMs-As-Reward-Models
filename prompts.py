@@ -42,6 +42,14 @@ class PromptGenerator:
 
                     Grid Layout:
                     - The grid is a frozen lake represented as a square matrix with start (S), goal (G), frozen tiles (F), and holes (H).
+                    - There is only one Goal and start, however there can be multiple frozen tiles and holes.
+                    - Format of the grid:
+                    - The grid is represented as a list of strings, where each string corresponds to a row of the grid.
+                        - For example, a 4x4 grid might look like this:
+                            ['SFHF', 
+                             'FFFH', 
+                             'FFHF', 
+                             'FFFG']
 
                     Action Space:
                     - The agent can take one of the following actions:
@@ -49,18 +57,52 @@ class PromptGenerator:
                         1: Down
                         2: Right
                         3: Up
+                        
+                    Observation Space"
+                    - The observation is a value representing the player’s current position as current_row * ncols + current_col 
+                    (where both the row and col start at 0).
+
+                    - For example, the goal position in the 4x4 map can be calculated as follows: 3 * 4 + 3 = 15. 
+                    The number of possible observations is dependent on the size of the map.
+                    
+                    State Mapping:
+                    - Each state is represented as an integer corresponding to its position in the grid, with positions counted row-wise from 0.
+                        For example, in a 4x4 grid:
+                        - The top-left corner (row 0, column 0) is state 0.
+                        - The top-right corner (row 0, column 3) is state 3.
+                        - The bottom-left corner (row 3, column 0) is state 12.
+                        - The bottom-right corner (row 3, column 3) is state 15.
+                    - The grid values at these positions are S (start), G (goal), F (frozen tile), or H (hole).
+    
 
                     Reward Space:
                     - 1: Reward for successfully reaching the goal (G).
-                    - -1: Penalize the user for falling into a hole (H).
+                    - 0: Penalize the user for falling into a hole (H).
                     - 0: No immediate reward for stepping onto frozen tiles (F).
+                    
+                    Reward of +1 should only be given if the state reaches the Goal (G).
 
                     Instructions:
-                    Based on the current state, action, and resulting state, decide the reward (1, -1, or 0) for the user's action.
+                    Based on the action which is either 0,1,2 or 3 and the resulting state which represents the grid value, 
+                    decide the reward (1 or 0) for the user's action.
 
                     Constraints:
-                    - Only output one of the following values: 1, -1, or 0.
+                    - Only output one of the following values: 1 or 0.
                     - Do not include any explanation or additional text.
+                    
+                    Example of generating a reward:
+                        - action is 1, next state is 7, and the grid is ['SFHF', 
+                             'FFFH', 
+                             'FFHF', 
+                             'FFFG']
+                        - Use the grid size (number of rows and columns) to compute the row and column.
+                        - Row index = `next_state // number_of_columns`.
+                        - Column index = `next_state % number_of_columns`.
+                        - For example, in a 4x4 grid:
+                            - Row index = 7 // 4 = 1
+                            - Column index = 7 % 4 = 3
+                            - So, `next_state` 7 corresponds to the grid position (1, 3).
+                        - (1, 3) corresponds to 'H' which means reward should be 0.
                     """
 
         self.pendulum = """

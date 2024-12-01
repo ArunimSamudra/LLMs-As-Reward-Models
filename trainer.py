@@ -1,11 +1,13 @@
 import os
 import re
 import time
-
+import gymnasium as gym
+from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import numpy as np
 from openai import OpenAI
 
 from prompts import PromptGenerator
+
 
 
 class Trainer:
@@ -31,21 +33,9 @@ class Trainer:
         )
         response = response.choices[0].message.content
 
-        # Extract the reason using regex
-        # reason_match = re.search(r"Reason:\s*(.+?)(?:\n|$)", response, re.DOTALL)
-        # reason = reason_match.group(1).strip() if reason_match else None
-        #
-        # # Extract the output using regex
-        # output_match = re.search(r"Output:\s*(-?\d+(\.\d+)?)", response)
-        # output = float(output_match.group(1)) if output_match else None
-        #
-        # print(description)
-        # print(reason)
-        # print(output)
-
         return int(response)
 
-    def train_agent_with_llm(self, env, agent, episodes=500, batch_size=64, target_update_freq=10):
+    def train_agent_with_llm(self, env, agent, episodes=500, batch_size=64, target_update_freq=10, map=None):
         rewards = []
         start_time = time.time()
         for episode in range(episodes):
@@ -59,11 +49,11 @@ class Trainer:
                 next_state, algo_reward, done, _, _ = env.step(action)
 
                 # Describe the state transition in natural language
-                blackjack_description = f"The agent chose action {action} and transitioned to state {next_state}. The dealer's cards are {env.env.env.dealer}"
-                fl_description = f"The frozen lake looks like this: {generate_random_map(size=4)}.\n\nThe agent chose action {action} and transitioned to state {next_state}."
+                #blackjack_description = f"The agent chose action {action} and transitioned to state {next_state}. The dealer's cards are {env.env.env.dealer}"
+                fl_desc = f"The frozen lake looks like this: {map}.\n\nThe agent chose the action {action} and transitioned to state {next_state}."
 
                 # Get reward from LLM
-                reward = self.get_llm_reward(fl_description) # blackjack_description, fl_description
+                reward = self.get_llm_reward(fl_desc)
 
                 # Add experience to replay buffer
                 next_state = np.array(next_state, dtype=np.float32)
@@ -73,6 +63,10 @@ class Trainer:
 
                 # Train the agent
                 agent.train(batch_size)
+                if reward > 0:
+                    print("LLM Reward:", reward, next_state)
+                if done:
+                    print(next_state)
 
             rewards.append(episode_reward)
             agent.epsilon = max(agent.min_epsilon, agent.epsilon * agent.epsilon_decay)
@@ -109,6 +103,10 @@ class Trainer:
 
                 # Train the agent
                 agent.train(batch_size)
+                if reward > 0:
+                    print("Reward:", reward, next_state)
+                if done:
+                    print(next_state)
 
             rewards.append(episode_reward)
             agent.epsilon = max(agent.min_epsilon, agent.epsilon * agent.epsilon_decay)
