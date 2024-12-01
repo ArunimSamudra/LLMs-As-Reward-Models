@@ -12,11 +12,12 @@ class Options:
         self.batch_size = 64  # Batch size for training
         self.steps = 200  # Max steps per episode
         self.train_episodes = 200  # Number of training episodes
+        self.test_episodes = 20
 
 def main():
     # Create the Pendulum environment
     env = gym.make("Pendulum-v1")
-    eval_env = gym.make("Pendulum-v1")  # Separate evaluation environment
+    eval_env = gym.make("Pendulum-v1", render_mode='human')  # Separate evaluation environment
     
     # Define options
     options = Options()
@@ -32,11 +33,11 @@ def main():
         
         # Evaluate the policy
         total_reward = 0
-        state, _ = eval_env.reset()
+        state, _ = env.reset()
         done = False
         while not done:
             action = agent.policy(state)
-            next_state, reward, terminated, truncated, _ = eval_env.step(action)
+            next_state, reward, terminated, truncated, _ = env.step(action)
             total_reward += reward
             done = terminated or truncated
             state = next_state
@@ -46,6 +47,25 @@ def main():
 
     # Plot results
     agent.plot(episode_rewards, final=True)
+
+    # Evaluating
+    test_episode_rewards = []
+
+    for episode in range(options.test_episodes):
+        
+        # Evaluate the policy
+        total_reward_test = 0
+        state, _ = eval_env.reset()
+        done = False
+        while not done:
+            action = agent.policy(state)
+            next_state, reward, terminated, truncated, _ = eval_env.step(action)
+            total_reward_test += reward
+            done = terminated or truncated
+            state = next_state
+        
+        test_episode_rewards.append(total_reward_test)
+        print(f"Episode {episode + 1}/{options.test_episodes}, Reward: {total_reward_test:.2f}")
 
 if __name__ == "__main__":
     main()

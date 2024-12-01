@@ -68,5 +68,5 @@ if __name__ == "__main__":
 
     print("Evaluating the trained agent...")
 
-    env = gym.make(env_name, render_mode=None, is_slippery=False, desc=generate_random_map(size=4))  # Add 'is_slippery' to simulate the stochastic environment
-    evaluate_agent(agent, env, randomize_env=True)
+    env = gym.make(env_name, render_mode=None, is_slippery=False) #, desc=generate_random_map(size=4))  # Add 'is_slippery' to simulate the stochastic environment, render_mode='human' for visualization, desc=generate_random_map(size=4) for random map
+    evaluate_agent(agent, env, randomize_env=False)
