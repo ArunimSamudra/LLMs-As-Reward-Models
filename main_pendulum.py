@@ -11,13 +11,13 @@ class Options:
         self.replay_memory_size = 100000  # Replay buffer size
         self.batch_size = 64  # Batch size for training
         self.steps = 200  # Max steps per episode
-        self.train_episodes = 200  # Number of training episodes
-        self.test_episodes = 20
+        self.train_episodes = 400  # Number of training episodes
+        self.test_episodes = 50
 
 def main():
     # Create the Pendulum environment
     env = gym.make("Pendulum-v1")
-    eval_env = gym.make("Pendulum-v1", render_mode='human')  # Separate evaluation environment
+    eval_env = gym.make("Pendulum-v1", render_mode=None)  # Separate evaluation environment
     
     # Define options
     options = Options()
@@ -29,7 +29,9 @@ def main():
     episode_rewards = []
     for episode in range(options.train_episodes):
         # Run one episode
+
         agent.train_episode()
+        # agent.train_episode_with_llm()
         
         # Evaluate the policy
         total_reward = 0
@@ -44,6 +46,8 @@ def main():
         
         episode_rewards.append(total_reward)
         print(f"Episode {episode + 1}/{options.train_episodes}, Reward: {total_reward:.2f}")
+
+    print("Average reward: " + str(np.mean(np.array(episode_rewards))))
 
     # Plot results
     agent.plot(episode_rewards, final=True)
@@ -67,5 +71,9 @@ def main():
         test_episode_rewards.append(total_reward_test)
         print(f"Episode {episode + 1}/{options.test_episodes}, Reward: {total_reward_test:.2f}")
 
+    # Plot results
+    print("Average reward: " + str(np.mean(np.array(test_episode_rewards))))
+    agent.plot(test_episode_rewards, final=True)
+    
 if __name__ == "__main__":
     main()

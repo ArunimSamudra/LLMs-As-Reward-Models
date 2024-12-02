@@ -22,6 +22,8 @@ from torch.distributions.normal import Normal
 
 from utils import plotting
 
+from trainer import Trainer
+
 
 class QNetwork(nn.Module):
     def __init__(self, obs_dim, act_dim, hidden_sizes):
@@ -87,6 +89,10 @@ class DDPG(AbstractSolver):
 
         # Replay buffer
         self.replay_memory = deque(maxlen=options.replay_memory_size)
+
+        self.trainer = Trainer()
+        self.env = env
+        self.eval_env
 
     @torch.no_grad()
     def update_target_networks(self, tau=0.995):
@@ -228,6 +234,45 @@ class DDPG(AbstractSolver):
             action = self.select_action(state)
             next_state, reward, done, _ = self.step(action)
             
+            self.memorize(state, action, reward, next_state, done)
+            self.replay()
+            self.update_target_networks()
+            
+            state = next_state
+
+            if done:
+                break
+
+    def train_episode_with_llm(self):
+        """
+        Runs a single episode of the DDPG algorithm.
+
+        Use:
+            self.select_action(state): Sample an action from the policy.
+            self.step(action): Performs an action in the env.
+            self.memorize(state, action, reward, next_state, done): store the transition in
+                the replay buffer.
+            self.replay(): Sample transitions and update actor_critic.
+            self.update_target_networks(): Update target_actor_critic using Polyak averaging.
+        """
+
+        state, _ = self.env.reset()
+        for _ in range(self.options.steps):
+            ################################
+            #   YOUR IMPLEMENTATION HERE   #
+            ################################
+
+            action = self.select_action(state)
+            next_state, reward, done, _ = self.step(action)
+            pendulum_description = f"The torque is {action} and x, y and the angular velocity are {next_state}"
+            reward = self.trainer.get_llm_reward(pendulum_description)
+
+            try:
+                reward = float(reward)
+            except:
+                print("Invalid reward - " + reward)
+                continue
+
             self.memorize(state, action, reward, next_state, done)
             self.replay()
             self.update_target_networks()

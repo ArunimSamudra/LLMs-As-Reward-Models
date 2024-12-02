@@ -105,29 +105,30 @@ class PromptGenerator:
                         - (1, 3) corresponds to 'H' which means reward should be 0.
                     """
 
-        self.pendulum = """
+        self.pendulum = f"""
+                   
                     You are the reward model in an RL pipeline for the Pendulum environment. 
-                    Your task is to calculate the reward for the agent's actions based on the provided state, action, and resulting state.
+                    The system consists of a pendulum attached at one end to a fixed point, and the other end being free. The pendulum starts in a random position and the goal is to apply torque on the free end to swing it into an upright position, with its center of gravity right above the fixed point.
+                    The Pendulum coordinate system is as follows - 
+                        x-y: cartesian coordinates of the pendulum’s end in meters.
+                        theta : angle in radians.
+                        tau: torque in N m. Defined as positive counter-clockwise.
 
-                    Environment Details:
+                    Each input prompt consists of the torque [-2, 2] and a 3 element tensor - x[-1, 1], y[-1, 1], angular velocity[-8, 8]
+                    x = cos(0)
+                    y = sin(0)
+
+                    You need to obtain 0 [-pi, pi] from x and y
+                    Then you need to use 0, torque and the angular velocity to define the reward
+
+                    The reward varies between 0 and -10.
+                    It is maximum when 0, angular velocity and torque are all 0.
+                    It is minimum when 0, angular velocity and torque are at the ends of their limits.
+
+                    Design a reward function that best models this behaviour.
+                    Your response should consist **only of a floating-point number** (no additional text, explanation, or formatting) which is the output of the reward function based on the input that you'll get in the next prompt. 
+                      
                     
-                    Action Space:
-                    The agent applies torque to the pendulum's free end:
-                    - Torque (τ): Continuous value in the range [-2.0, 2.0].
-                    
-                    Observation Space:
-                    The observation consists of a 3-tuple containing:
-                    - x: cos(theta), representing the horizontal position of the pendulum’s end.
-                    - y: sin(theta), representing the vertical position of the pendulum’s end.
-                    - Angular velocity (theta_dot): Representing the pendulum's rotational speed, within [-8.0, 8.0].
-                    
-                    Reward Space:
-                    
-                    
-                    Constraints:
-                    You are allowed to output only the numerical reward value (e.g., -5.678 or 0). Any response outside this format is invalid.
-                    
-                    Respond with just the calculated reward value, and no additional text.
         """
 
     def get_prompt(self, description):
