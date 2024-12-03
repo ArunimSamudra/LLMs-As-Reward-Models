@@ -38,10 +38,12 @@ class Trainer:
     def train_agent_with_llm(self, env, agent, episodes=500, batch_size=64, target_update_freq=10, map=None):
         rewards = []
         start_time = time.time()
+        losses = []
         for episode in range(episodes):
             state, _ = env.reset()
             state = np.array(state, dtype=np.float32)
             episode_reward = 0
+            loss = 0
             done = False
 
             while not done:
@@ -62,12 +64,12 @@ class Trainer:
                 episode_reward += reward
 
                 # Train the agent
-                agent.train(batch_size)
+                loss = agent.train(batch_size)
                 if reward > 0:
                     print("LLM Reward:", reward, next_state)
                 if done:
                     print(next_state)
-
+            losses.append(loss)
             rewards.append(episode_reward)
             agent.epsilon = max(agent.min_epsilon, agent.epsilon * agent.epsilon_decay)
 
@@ -82,15 +84,17 @@ class Trainer:
         # Calculate the time taken
         execution_time = end_time - start_time
         print("Time taken: {:.4f} seconds".format(execution_time))
-        return rewards
+        return rewards, losses
 
     def train_agent(self, env, agent, episodes=3000, batch_size=64, target_update_freq=10, verbose=True):
         rewards = []
+        losses = []
         start_time = time.time()
         for episode in range(episodes):
             state, _ = env.reset()
             state = np.array(state, dtype=np.float32)
             episode_reward = 0
+            loss = 0
             done = False
 
             while not done:
@@ -102,12 +106,8 @@ class Trainer:
                 episode_reward += reward
 
                 # Train the agent
-                agent.train(batch_size)
-                if reward > 0:
-                    print("Reward:", reward, next_state)
-                if done:
-                    print(next_state)
-
+                loss = agent.train(batch_size)
+            losses.append(loss)
             rewards.append(episode_reward)
             agent.epsilon = max(agent.min_epsilon, agent.epsilon * agent.epsilon_decay)
 
@@ -123,4 +123,4 @@ class Trainer:
         execution_time = end_time - start_time
         if(verbose):
             print("Time taken: {:.4f} seconds".format(execution_time))
-        return rewards
+        return rewards, losses

@@ -58,7 +58,7 @@ class PromptGenerator:
                         2: Right
                         3: Up
                         
-                    Observation Space"
+                    Observation Space:
                     - The observation is a value representing the player’s current position as current_row * ncols + current_col 
                     (where both the row and col start at 0).
 
@@ -76,15 +76,24 @@ class PromptGenerator:
     
 
                     Reward Space:
-                    - 1: Reward for successfully reaching the goal (G).
-                    - 0: Penalize the user for falling into a hole (H).
-                    - 0: No immediate reward for stepping onto frozen tiles (F).
+                    - **1**: Reward for successfully reaching the goal (G).  
+                        - This reward of **+1 MUST ONLY be given if the `next_state` corresponds to the position of 'G' in the grid**.
+                    - **0**: Reward for all other cases:
+                        - Falling into a hole (H).
+                        - Moving to a frozen tile (F).
+                        - Staying at or returning to the start (S).
                     
-                    Reward of +1 should only be given if the state reaches the Goal (G).
+                    Reward of +1 should ONLY be given if the state reaches the Goal (G).
+                    
+                    IMPORTANT CONSTRAINT:
+                    - Reward of **1** must ONLY be given if the `next_state` corresponds to 'G'.
+                    - For all other cases, including transitions to S, F, or H, the reward MUST be 0.
+                    - If the `next_state` is NOT the goal (G), output **only 0**. No exceptions.
 
                     Instructions:
                     Based on the action which is either 0,1,2 or 3 and the resulting state which represents the grid value, 
                     decide the reward (1 or 0) for the user's action.
+                    Ensure that the output adheres to the rules stated above.
 
                     Constraints:
                     - Only output one of the following values: 1 or 0.
@@ -103,6 +112,7 @@ class PromptGenerator:
                             - Column index = 7 % 4 = 3
                             - So, `next_state` 7 corresponds to the grid position (1, 3).
                         - (1, 3) corresponds to 'H' which means reward should be 0.
+                        - If `next_state` had corresponded to the goal (G), the reward would be **1**
                     """
 
         self.pendulum = """

@@ -5,6 +5,9 @@ from collections import deque
 import random
 import numpy as np
 
+from utils import plotting
+
+
 class QNetwork(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(QNetwork, self).__init__()
@@ -99,6 +102,10 @@ class DQNAgent:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        return loss.item()
 
     def update_target_network(self):
         self.target_network.load_state_dict(self.q_network.state_dict())
+
+    def plot(self, stats, smoothing_window=20, final=False):
+        plotting.plot_episode_stats(stats, smoothing_window, final=final)
